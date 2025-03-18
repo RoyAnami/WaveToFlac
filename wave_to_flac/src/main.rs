@@ -54,5 +54,5 @@ fn update_cue_file(cue_path: &Path) {
     let updated_content = re.replace_all(&content, "$1.flac$3").to_string();
     
     fs::write(cue_path, updated_content).expect("CUEファイルの更新に失敗しました");
-    println!("CUEファイルを更新しました: {:?}", cue_path);
+    println!("CUEファイルを更新しましたd: {:?}", cue_path);
 }

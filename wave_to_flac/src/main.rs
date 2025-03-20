@@ -56,3 +56,4 @@ fn update_cue_file(cue_path: &Path) {
     fs::write(cue_path, updated_content).expect("CUEファイルの更新に失敗しました");
     println!("CUEファイルを更新しましたd: {:?}", cue_path);
 }
+a

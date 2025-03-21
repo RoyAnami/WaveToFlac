@@ -1,6 +1,6 @@
 use rfd::FileDialog;
 use std::fs;
-use std::path::{Path};
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use regex::Regex;
 use encoding_rs::SHIFT_JIS;
@@ -8,7 +8,6 @@ use encoding_rs_io::DecodeReaderBytesBuilder;
 use std::io::{Read, Write};
 use std::fs::File;
 use image::{DynamicImage, GenericImageView, ImageFormat};
-use std::path::{Path, PathBuf};
 
 fn main() {
     // フォルダ選択ダイアログを開く
@@ -17,15 +16,22 @@ fn main() {
     if let Some(folder_path) = folder {
         println!("選択されたフォルダ: {:?}", folder_path);
         
-        // フォルダ内の.wavファイルを取得
         let entries = fs::read_dir(&folder_path).unwrap();
         for entry in entries {
             if let Ok(entry) = entry {
                 let path = entry.path();
+
+                // WAV → FLAC 変換
                 if path.extension().map_or(false, |ext| ext == "wav") {
                     convert_wav_to_flac(&path);
-                } else if path.extension().map_or(false, |ext| ext == "cue") {
+                }
+                // CUEファイルの更新
+                else if path.extension().map_or(false, |ext| ext == "cue") {
                     update_cue_file(&path);
+                }
+                // 画像処理
+                else if path.extension().map_or(false, |ext| ext == "jpg" || ext == "png") {
+                    process_image(&path);
                 }
             }
         }
@@ -82,4 +88,65 @@ fn update_cue_file(cue_path: &Path) {
     output_file.write_all(&encoded_content).expect("CUEファイルの保存に失敗しました");
 
     println!("CUEファイルを更新しました: {:?}", cue_path);
+}
+
+fn process_image(image_path: &Path) {
+    println!("画像処理: {:?}", image_path);
+
+    // 画像を開く
+    let img = match image::open(image_path) {
+        Ok(img) => img,
+        Err(e) => {
+            println!("画像の読み込みに失敗しました: {:?}, エラー: {}", image_path, e);
+            return;
+        }
+    };
+
+    let (orig_width, orig_height) = img.dimensions();
+    println!("元の解像度: {} x {}", orig_width, orig_height);
+
+    let mut resized_img = img.clone();
+
+    // ① リサイズ処理（元の画像が300x300を超えている場合のみ）
+    if orig_width > 300 || orig_height > 300 {
+        resized_img = img.resize(300, 300, image::imageops::FilterType::Lanczos3);
+        println!("リサイズ処理完了");
+    }
+
+    // **ここを修正**
+    // 元のファイルにリサイズ後の画像を上書き保存
+    let mut original_file = File::create(image_path).expect("元の画像の保存に失敗しました");
+    let original_format = if image_path.extension().map_or(false, |ext| ext.eq_ignore_ascii_case("jpg")) {
+        ImageFormat::Jpeg
+    } else {
+        ImageFormat::Png
+    };
+    resized_img.write_to(&mut original_file, original_format).expect("元の画像の上書きに失敗しました");
+
+    // ② 画像フォーマットの変換
+    if let Some(ext) = image_path.extension() {
+        let mut new_format: ImageFormat;
+        let mut new_ext: &str;
+        
+        if ext.eq_ignore_ascii_case("jpg") || ext.eq_ignore_ascii_case("jpeg") {
+            new_format = ImageFormat::Png;
+            new_ext = "png";
+        } else if ext.eq_ignore_ascii_case("png") {
+            new_format = ImageFormat::Jpeg;
+            new_ext = "jpg";
+        } else {
+            println!("対応していない画像形式です: {:?}", ext);
+            return;
+        }
+
+        // 変換後のファイル名を決定（同じフォルダに拡張子変更）
+        let mut new_path = PathBuf::from(image_path);
+        new_path.set_extension(new_ext);
+
+        // ファイルを保存（リサイズ後の画像を新しいフォーマットで保存）
+        let mut output_file = File::create(&new_path).expect("変換後の画像ファイルの作成に失敗しました");
+        resized_img.write_to(&mut output_file, new_format).expect("変換後の画像の保存に失敗しました");
+
+        println!("画像フォーマット変換完了: {:?} -> {:?}", image_path, new_path);
+    }
 }

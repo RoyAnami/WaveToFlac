@@ -1,0 +1,11 @@
+C:\Users\kyou_\Documents\Program\GitHub\Rust\wave_to_flac\target\debug\deps\libv_frame-d83b9ae9c44641c2.rmeta: C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\lib.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\frame.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\math.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\pixel.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\plane.rs
+
+C:\Users\kyou_\Documents\Program\GitHub\Rust\wave_to_flac\target\debug\deps\libv_frame-d83b9ae9c44641c2.rlib: C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\lib.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\frame.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\math.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\pixel.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\plane.rs
+
+C:\Users\kyou_\Documents\Program\GitHub\Rust\wave_to_flac\target\debug\deps\v_frame-d83b9ae9c44641c2.d: C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\lib.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\frame.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\math.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\pixel.rs C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\plane.rs
+
+C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\lib.rs:
+C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\frame.rs:
+C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\math.rs:
+C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\pixel.rs:
+C:\Users\kyou_\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\v_frame-0.3.8\src\plane.rs:

@@ -3,6 +3,12 @@ use std::fs;
 use std::path::{Path};
 use std::process::Command;
 use regex::Regex;
+use encoding_rs::SHIFT_JIS;
+use encoding_rs_io::DecodeReaderBytesBuilder;
+use std::io::{Read, Write};
+use std::fs::File;
+use image::{DynamicImage, GenericImageView, ImageFormat};
+use std::path::{Path, PathBuf};
 
 fn main() {
     // フォルダ選択ダイアログを開く
@@ -55,11 +61,25 @@ fn convert_wav_to_flac(input_path: &Path) {
 
 fn update_cue_file(cue_path: &Path) {
     println!("CUEファイルを更新: {:?}", cue_path);
-    
-    let content = fs::read_to_string(cue_path).expect("CUEファイルの読み込みに失敗しました");
+
+    // Shift-JIS で読み込む
+    let mut file = File::open(cue_path).expect("CUEファイルの読み込みに失敗しました");
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).expect("CUEファイルの読み込み中にエラーが発生しました");
+
+    let (content, _, had_errors) = SHIFT_JIS.decode(&buffer);
+    if had_errors {
+        println!("警告: Shift-JIS のデコード中にエラーが発生しましたが、可能な限り処理を続行します。");
+    }
+
+    // `.wav` を `.flac` に置換
     let re = Regex::new(r#"(?i)(FILE \".*?)(\.wav)(\"\s*WAVE)"#).unwrap();
     let updated_content = re.replace_all(&content, "$1.flac$3").to_string();
-    
-    fs::write(cue_path, updated_content).expect("CUEファイルの更新に失敗しました");
-    println!("CUEファイルを更新しましたd: {:?}", cue_path);
+
+    // Shift-JIS にエンコードして保存
+    let (encoded_content, _, _) = SHIFT_JIS.encode(&updated_content);
+    let mut output_file = File::create(cue_path).expect("CUEファイルの書き込みに失敗しました");
+    output_file.write_all(&encoded_content).expect("CUEファイルの保存に失敗しました");
+
+    println!("CUEファイルを更新しました: {:?}", cue_path);
 }

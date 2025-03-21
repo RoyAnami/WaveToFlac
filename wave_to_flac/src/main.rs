@@ -8,6 +8,7 @@ use encoding_rs_io::DecodeReaderBytesBuilder;
 use std::io::{Read, Write};
 use std::fs::File;
 use image::{DynamicImage, GenericImageView, ImageFormat};
+use fs_extra::dir::{copy, CopyOptions};
 
 fn main() {
     // フォルダ選択ダイアログを開く
@@ -35,6 +36,28 @@ fn main() {
                 }
             }
         }
+
+        // 変換後のFLAC, CUE, 画像を整理
+        let entries = fs::read_dir(&folder_path).unwrap();
+        for entry in entries {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+                if path.extension().map_or(false, |ext| matches!(ext.to_str(), Some("flac") | Some("cue") | Some("jpg") | Some("png"))) {
+                    organize_files(&folder_path, &path);
+                }
+            }
+        }
+
+        // 作成されたアルバムフォルダを取得
+        let artist_folder = organize_files(&folder_path, &folder_path);  // artist_folder を取得
+        println!("{:?}", artist_folder);
+        // コピー先のパスを設定
+        let dest1 = Path::new(r"A:\Music\flac");
+        let dest2 = Path::new(r"\\asustor\Storage\_Music\flac");
+
+        // フォルダを2つの場所にコピー
+        copy_folder_to_dest(&artist_folder, &dest1);
+        copy_folder_to_dest(&artist_folder, &dest2);
     } else {
         println!("フォルダが選択されませんでした。");
     }
@@ -148,5 +171,59 @@ fn process_image(image_path: &Path) {
         resized_img.write_to(&mut output_file, new_format).expect("変換後の画像の保存に失敗しました");
 
         println!("画像フォーマット変換完了: {:?} -> {:?}", image_path, new_path);
+    }
+}
+
+fn organize_files(base_folder: &Path, file_path: &Path) -> PathBuf {
+    // ファイル名を取得（拡張子なし）
+    let file_name = file_path.file_stem().unwrap().to_string_lossy();
+    
+    // " - " で分割
+    let parts: Vec<&str> = file_name.splitn(2, " - ").collect();
+    if parts.len() < 2 {
+        println!("無効なファイル名形式: {:?}", file_path);
+        return PathBuf::new(); // 無効な場合は空のPathを返す
+    }
+
+    let artist = parts[0].trim();
+    let album = parts[1].trim();
+
+    // 移動先フォルダのパスを作成
+    let artist_folder = base_folder.join(artist);
+    let album_folder = artist_folder.join(album);
+
+    // フォルダを作成（すでに存在する場合はスキップ）
+    fs::create_dir_all(&album_folder).expect("フォルダの作成に失敗しました");
+
+    // 移動先のパス
+    let new_path = album_folder.join(file_path.file_name().unwrap());
+
+    // ファイルを移動
+    fs::rename(file_path, &new_path).expect("ファイルの移動に失敗しました");
+    
+    println!("ファイル移動: {:?} -> {:?}", file_path, new_path);
+
+    // 作成した artist_folder を返す
+    artist_folder
+}
+
+fn copy_folder_to_dest(src: &Path, dest: &Path) {
+    // コピー先フォルダが存在しない場合、作成する
+    if !dest.exists() {
+        fs::create_dir_all(dest).expect("コピー先フォルダの作成に失敗しました");
+        println!("コピー先フォルダを作成しました: {:?}", dest);
+    }
+
+    let mut options = CopyOptions::new();
+    options.overwrite = true;  // 上書きコピーを許可
+    options.copy_inside = true; // 中身もコピー
+
+    // フォルダをコピー
+    if let Err(e) = copy(src, dest, &options) {
+        println!("{:?}", src);
+        println!("{:?}", dest);
+        println!("フォルダのコピーに失敗しました: {:?}", e);
+    } else {
+        println!("フォルダをコピーしました: {:?} -> {:?}", src, dest);
     }
 }

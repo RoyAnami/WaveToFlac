@@ -31,16 +31,23 @@ fn main() {
 fn convert_wav_to_flac(input_path: &Path) {
     let output_path = input_path.with_extension("flac");
     println!("変換: {:?} -> {:?}", input_path, output_path);
-    
+
     let status = Command::new("flac")
         .arg("-fo")
         .arg(output_path.as_os_str())
         .arg(input_path.as_os_str())
         .status()
         .expect("FLACコマンドの実行に失敗しました");
-    
+
     if status.success() {
         println!("FLACファイルが作成されました: {:?}", output_path);
+
+        // 変換成功後、元のWAVファイルを削除
+        if let Err(e) = fs::remove_file(input_path) {
+            println!("元のWAVファイルの削除に失敗しました: {:?}, エラー: {}", input_path, e);
+        } else {
+            println!("元のWAVファイルを削除しました: {:?}", input_path);
+        }
     } else {
         println!("FLACファイルの変換に失敗しました。");
     }
@@ -56,5 +63,3 @@ fn update_cue_file(cue_path: &Path) {
     fs::write(cue_path, updated_content).expect("CUEファイルの更新に失敗しました");
     println!("CUEファイルを更新しましたd: {:?}", cue_path);
 }
-a
-a

@@ -50,14 +50,12 @@ fn main() {
 
         // 作成されたアルバムフォルダを取得
         let artist_folder = organize_files(&folder_path, &folder_path);  // artist_folder を取得
-        println!("{:?}", artist_folder);
+        println!("artist folder is {:?}", artist_folder);
+        
         // コピー先のパスを設定
         let dest1 = Path::new(r"A:\Music\flac");
         let dest2 = Path::new(r"\\asustor\Storage\_Music\flac");
 
-        // フォルダを2つの場所にコピー
-        copy_folder_to_dest(&artist_folder, &dest1);
-        copy_folder_to_dest(&artist_folder, &dest2);
     } else {
         println!("フォルダが選択されませんでした。");
     }
@@ -136,7 +134,6 @@ fn process_image(image_path: &Path) {
         println!("リサイズ処理完了");
     }
 
-    // **ここを修正**
     // 元のファイルにリサイズ後の画像を上書き保存
     let mut original_file = File::create(image_path).expect("元の画像の保存に失敗しました");
     let original_format = if image_path.extension().map_or(false, |ext| ext.eq_ignore_ascii_case("jpg")) {
@@ -195,35 +192,31 @@ fn organize_files(base_folder: &Path, file_path: &Path) -> PathBuf {
     // フォルダを作成（すでに存在する場合はスキップ）
     fs::create_dir_all(&album_folder).expect("フォルダの作成に失敗しました");
 
-    // 移動先のパス
-    let new_path = album_folder.join(file_path.file_name().unwrap());
+    // コピー先のパスを設定
+    let dest1 = Path::new(r"A:\Music\flac").join(artist).join(album);
+    let dest2 = Path::new(r"\\asustor\Storage\_Music\flac").join(artist).join(album);
+
+    // コピー先フォルダが存在しない場合、作成する
+    fs::create_dir_all(&dest1).expect("コピー先フォルダの作成に失敗しました");
+    fs::create_dir_all(&dest2).expect("コピー先フォルダの作成に失敗しました");
+
+    // ファイルをコピー
+    let file_name = file_path.file_name().unwrap();
+    let dest1_file = dest1.join(file_name);
+    let dest2_file = dest2.join(file_name);
+
+    fs::copy(file_path, &dest1_file).expect("ファイルのコピーに失敗しました (A:)");
+    fs::copy(file_path, &dest2_file).expect("ファイルのコピーに失敗しました (\\asustor)");
+
+    println!("ファイルをコピーしました: {:?} -> {:?}", file_path, dest1_file);
+    println!("ファイルをコピーしました: {:?} -> {:?}", file_path, dest2_file);
 
     // ファイルを移動
+    let new_path = album_folder.join(file_name);
     fs::rename(file_path, &new_path).expect("ファイルの移動に失敗しました");
-    
+
     println!("ファイル移動: {:?} -> {:?}", file_path, new_path);
 
     // 作成した artist_folder を返す
     artist_folder
-}
-
-fn copy_folder_to_dest(src: &Path, dest: &Path) {
-    // コピー先フォルダが存在しない場合、作成する
-    if !dest.exists() {
-        fs::create_dir_all(dest).expect("コピー先フォルダの作成に失敗しました");
-        println!("コピー先フォルダを作成しました: {:?}", dest);
-    }
-
-    let mut options = CopyOptions::new();
-    options.overwrite = true;  // 上書きコピーを許可
-    options.copy_inside = true; // 中身もコピー
-
-    // フォルダをコピー
-    if let Err(e) = copy(src, dest, &options) {
-        println!("{:?}", src);
-        println!("{:?}", dest);
-        println!("フォルダのコピーに失敗しました: {:?}", e);
-    } else {
-        println!("フォルダをコピーしました: {:?} -> {:?}", src, dest);
-    }
 }

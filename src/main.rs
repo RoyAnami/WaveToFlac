@@ -4,11 +4,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use regex::Regex;
 use encoding_rs::SHIFT_JIS;
-use encoding_rs_io::DecodeReaderBytesBuilder;
 use std::io::{Read, Write};
 use std::fs::File;
-use image::{DynamicImage, GenericImageView, ImageFormat};
-use fs_extra::dir::{copy, CopyOptions};
+use image::{GenericImageView, ImageFormat};
 
 fn main() {
     // フォルダ選択ダイアログを開く
@@ -53,8 +51,8 @@ fn main() {
         println!("artist folder is {:?}", artist_folder);
         
         // コピー先のパスを設定
-        let dest1 = Path::new(r"A:\Music\flac");
-        let dest2 = Path::new(r"\\asustor\Storage\_Music\flac");
+        let _dest1 = Path::new(r"A:\Music\flac");
+        let _dest2 = Path::new(r"\\asustor\Storage\_Music\flac");
 
     } else {
         println!("フォルダが選択されませんでした。");
@@ -145,8 +143,8 @@ fn process_image(image_path: &Path) {
 
     // ② 画像フォーマットの変換
     if let Some(ext) = image_path.extension() {
-        let mut new_format: ImageFormat;
-        let mut new_ext: &str;
+        let new_format: ImageFormat;
+        let new_ext: &str;
         
         if ext.eq_ignore_ascii_case("jpg") || ext.eq_ignore_ascii_case("jpeg") {
             new_format = ImageFormat::Png;

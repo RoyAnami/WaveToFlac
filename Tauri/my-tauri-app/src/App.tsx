@@ -18,6 +18,11 @@ function App() {
   }
 
   async function runProcess() {
+    if (!folder) {
+      setMessage("フォルダを選択してください");
+      return;
+    }
+
     try {
       const result = await invoke<string>("process_folder", {
         folderPath: folder
